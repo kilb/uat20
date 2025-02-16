@@ -17,6 +17,8 @@ contract UAT20 is ERC20, ERC20Burnable, AccessControl, ERC20Permit {
     mapping (address => uint256) public tmp_used;
     mapping (bytes32 => uint256) public pending_transfers;
 
+    mapping (address => int256) public balance_differ;
+
     constructor(address defaultAdmin, address minter)
         ERC20("UAT20", "UAT")
         ERC20Permit("UAT20")
@@ -31,9 +33,10 @@ contract UAT20 is ERC20, ERC20Burnable, AccessControl, ERC20Permit {
     }
 
     function _decrease_limit(address to, uint256 amount) private {
-        require(amount <= balanceOf(to), "out of balance");
+        require(amount <= super.balanceOf(to), "out of balance");
         _burn(to, amount);
         single_balance[to] += amount;
+        balance_differ[to] += int256(amount);
     }
 
     function decrease_limit(address to, uint256 amount) public onlyRole(RELAYER_ROLE) {
@@ -78,6 +81,7 @@ contract UAT20 is ERC20, ERC20Burnable, AccessControl, ERC20Permit {
         _mint(to, amount);
         balance_used[to] += amount;
         tmp_used[to] -= amount;
+        balance_differ[to] -= int256(amount);
     }
 
     function increase_limit(address to, uint256 amount, bytes memory _proof) public onlyRole(RELAYER_ROLE) {
@@ -88,31 +92,48 @@ contract UAT20 is ERC20, ERC20Burnable, AccessControl, ERC20Permit {
         internal
         override(ERC20)
     {
-        if (amount <= balanceOf(from) || from == address(0)) {
+        if (amount <= super.balanceOf(from) || from == address(0)) {
             super._update(from, to, amount);
+            balance_differ[to] += int256(amount);
+            balance_differ[from] -= int256(amount);
         } else {
             bytes32 h = keccak256(abi.encode(from, to, amount));
             pending_transfers[h] += 1;
-            emit PendingTransfer(from, to, amount, balanceOf(from));
+            emit PendingTransfer(from, to, amount, super.balanceOf(from));
         }
+    }
+
+    function balanceOf(address from)
+        public view 
+        override(ERC20) returns (uint256)
+    {
+        if (from == address(0)) {
+            return super.balanceOf(from);
+        }
+        return uint256(int256(all_chain_balance[from]) + balance_differ[from]);
+    }
+
+    function limitOf(address from) public view returns (uint256) {
+        return super.balanceOf(from);
     }
 
     function finishTransfer(address from, address to, uint256 amount) public {
         bytes32 h = keccak256(abi.encode(from, to, amount));
         require(pending_transfers[h] > 0, "not found");
-        require(balanceOf(from) >= amount, "Out of Balance");
+        require(super.balanceOf(from) >= amount, "Out of Balance");
         pending_transfers[h] -= 1;
-        super._update(from, to, amount);
+        _update(from, to, amount);
         emit TransferFinish(from, to, amount);
     }
 
-    function _updateAllchainBalance(address to, uint256 amount, bytes memory) private {
+    function _updateAllchainBalance(address to, uint256 amount, int256 differ, bytes memory) private {
         // todo: verify proof
         all_chain_balance[to] = amount;
+        balance_differ[to] -= differ;
     }
 
-    function updateAllchainBalance(address to, uint256 amount, bytes memory _proof)  public onlyRole(RELAYER_ROLE) {
-        _updateAllchainBalance(to, amount, _proof);
+    function updateAllchainBalance(address to, uint256 amount, int256 differ, bytes memory _proof)  public onlyRole(RELAYER_ROLE) {
+        _updateAllchainBalance(to, amount, differ, _proof);
     }
 
     event IncreaseLimitRequest(address indexed to, uint256 value);

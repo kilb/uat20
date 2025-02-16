@@ -562,7 +562,7 @@
 				"inputs": [
 					{
 						"internalType": "address",
-						"name": "account",
+						"name": "from",
 						"type": "address"
 					}
 				],
@@ -572,6 +572,25 @@
 						"internalType": "uint256",
 						"name": "",
 						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "balance_differ",
+				"outputs": [
+					{
+						"internalType": "int256",
+						"name": "",
+						"type": "int256"
 					}
 				],
 				"stateMutability": "view",
@@ -850,6 +869,25 @@
 				"name": "increase_limit",
 				"outputs": [],
 				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "from",
+						"type": "address"
+					}
+				],
+				"name": "limitOf",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
@@ -1180,6 +1218,11 @@
 						"type": "uint256"
 					},
 					{
+						"internalType": "int256",
+						"name": "differ",
+						"type": "int256"
+					},
+					{
 						"internalType": "bytes",
 						"name": "_proof",
 						"type": "bytes"
@@ -1316,9 +1359,6 @@
 				},
 				"approve(address,uint256)": {
 					"details": "See {IERC20-approve}. NOTE: If `value` is the maximum `uint256`, the allowance is not updated on `transferFrom`. This is semantically equivalent to an infinite approval. Requirements: - `spender` cannot be the zero address."
-				},
-				"balanceOf(address)": {
-					"details": "See {IERC20-balanceOf}."
 				},
 				"burn(uint256)": {
 					"details": "Destroys a `value` amount of tokens from the caller. See {ERC20-_burn}."
@@ -1589,11 +1629,11 @@
 			]
 		},
 		"contracts/UAT20.sol": {
-			"keccak256": "0x0e3f4320bed95a8b2d61befa3e83971e573bbb9fb4cd9b172097084ce5ba6d41",
+			"keccak256": "0xba5efc1a2ad6971872720ec062108986f0b8246128e8a6362ee344142d04e639",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://4a832e4c37cf838591dd32d63a20b75625158d884771dd3cc6c5b92d70f0b6e1",
-				"dweb:/ipfs/QmdS4ucGv3DtvSERc6RTeM8xQj2xZwG4eyVyZXZY39isgm"
+				"bzz-raw://258c84c340253d9110f54c753844f01f8c0b7e186deb552a4d0b9dd55167de85",
+				"dweb:/ipfs/Qma1eS8KGAyKtToDKFmEfv8Zke4TpUYoxwLn1hpmc9oRs7"
 			]
 		}
 	},
