@@ -22,6 +22,7 @@ contract UAT20 is ERC20, ERC20Burnable, AccessControl, ERC20Permit {
         ERC20Permit("UAT20")
     {
         _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+         _grantRole(RELAYER_ROLE, defaultAdmin);
         _grantRole(MINTER_ROLE, minter);
     }
 
@@ -87,7 +88,7 @@ contract UAT20 is ERC20, ERC20Burnable, AccessControl, ERC20Permit {
         internal
         override(ERC20)
     {
-        if (amount <= balanceOf(from)) {
+        if (amount <= balanceOf(from) || from == address(0)) {
             super._update(from, to, amount);
         } else {
             bytes32 h = keccak256(abi.encode(from, to, amount));
